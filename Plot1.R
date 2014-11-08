@@ -1,4 +1,4 @@
-load.data <- function () {
+load.data <- function() {
     # download file
     consumption <- read.csv("household_power_consumption.txt", sep = ";", na.strings = '?',
                             colClasses = c(rep("character", 2), rep("numeric", 7)))
@@ -11,10 +11,18 @@ load.data <- function () {
     data
 }
 
+draw.plot1 <- function(data) {
+    # build plot
+    hist(data$Global_active_power, col = "red", main = "Global Active Power",
+         xlab = "Global Active Power (kilowatts)")
+}
+
+save.png <- function() {
+    # save png file and close graphics device
+    dev.copy(png, filename = "plot1.png")
+    dev.off()
+}
+
 data <- load.data()
-# build histogram
-hist(data$Global_active_power, col = "red", main = "Global Active Power",
-     xlab = "Global Active Power (kilowatts)")
-# save png file
-dev.copy(png, filename = "plot1.png")
-dev.off()
+draw.plot1(data)
+save.png()

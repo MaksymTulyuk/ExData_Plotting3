@@ -11,10 +11,18 @@ load.data <- function () {
     data
 }
 
+draw.plot2 <- function(data) {
+    # build plot
+    with(data, plot(datetime, Global_active_power, type = "l", xlab = "",
+                    ylab = "Global Active Power (kilowatts)"))
+}
+
+save.png <- function() {
+    # save png file and close graphics device
+    dev.copy(png, filename = "plot2.png")
+    dev.off()
+}
+
 data <- load.data()
-# build plot
-with(data, plot(datetime, Global_active_power, type = "l", xlab = "",
-                ylab = "Global Active Power (kilowatts)"))
-# save png file
-dev.copy(png, filename = "plot2.png")
-dev.off()
+draw.plot2(data)
+save.png()
