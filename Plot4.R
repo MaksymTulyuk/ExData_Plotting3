@@ -17,17 +17,17 @@ reset.graphics.device <- function(x = 2, y = 2) {
 }
 
 draw.plot1 <- function(data) {
-    # build plot
+    # build plot: Global active power
     with(data, plot(datetime, Global_active_power, type = "l", xlab = ""))
 }
 
 draw.plot2 <- function(data) {
-    # build plot
-    with(data, plot(datetime, Voltage, type = "l"))
+    # build plot: Voltage
+    with(data, plot(datetime, Voltage, type = "l", ylim=range(Voltage)))
 }
 
 draw.plot3 <- function(data) {
-    # build plot
+    # build plot: Sub metering
     with(data, plot(datetime, Sub_metering_1, type = "l", xlab = "", ylab = ""))
     par(new = TRUE)
     with(data, plot(datetime, Sub_metering_2, type = "l", col = "red", xlab = "",
@@ -41,7 +41,7 @@ draw.plot3 <- function(data) {
 }
 
 draw.plot4 <- function(data) {
-    # build plot
+    # build plot: Global reactive power
     with(data, plot(datetime, Global_reactive_power, type = "l"))
 }
 
