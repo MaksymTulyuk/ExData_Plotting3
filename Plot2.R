@@ -11,6 +11,11 @@ load.data <- function () {
     data
 }
 
+reset.graphics.device <- function(x = 1, y = 1) {
+    # reset graphics device
+    par(mfrow = c(x, y))
+}
+
 draw.plot2 <- function(data) {
     # build plot
     with(data, plot(datetime, Global_active_power, type = "l", xlab = "",
@@ -24,5 +29,6 @@ save.png <- function() {
 }
 
 data <- load.data()
+reset.graphics.device()
 draw.plot2(data)
 save.png()

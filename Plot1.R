@@ -11,6 +11,11 @@ load.data <- function() {
     data
 }
 
+reset.graphics.device <- function(x = 1, y = 1) {
+    # reset graphics device
+    par(mfrow = c(x, y))
+}
+
 draw.plot1 <- function(data) {
     # build plot
     hist(data$Global_active_power, col = "red", main = "Global Active Power",
@@ -24,5 +29,6 @@ save.png <- function() {
 }
 
 data <- load.data()
+reset.graphics.device()
 draw.plot1(data)
 save.png()

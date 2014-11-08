@@ -11,9 +11,19 @@ load.data <- function () {
     data
 }
 
-reset.graphics.device <- function(x = 1, y = 1) {
+reset.graphics.device <- function(x = 2, y = 2) {
     # reset graphics device
     par(mfrow = c(x, y))
+}
+
+draw.plot1 <- function(data) {
+    # build plot
+    with(data, plot(datetime, Global_active_power, type = "l", xlab = ""))
+}
+
+draw.plot2 <- function(data) {
+    # build plot
+    with(data, plot(datetime, Voltage, type = "l"))
 }
 
 draw.plot3 <- function(data) {
@@ -26,16 +36,25 @@ draw.plot3 <- function(data) {
     with(data, plot(datetime, Sub_metering_3, type = "l", col = "blue", xlab = "",
                     ylab = "Energy sub metering", ylim = range(Sub_metering_1)))
     par(new = TRUE)
-    legend("topright", lty = 1, col = c("black", "red", "blue"), legend = names(data)[5:7])
+    legend("topright", lty = 1, bty = "n",
+           col = c("black", "red", "blue"), legend = names(data)[5:7])
+}
+
+draw.plot4 <- function(data) {
+    # build plot
+    with(data, plot(datetime, Global_reactive_power, type = "l"))
 }
 
 save.png <- function() {
     # save png file and close graphics device
-    dev.copy(png, filename = "plot3.png")
+    dev.copy(png, filename = "plot4.png")
     dev.off()
 }
 
 data <- load.data()
 reset.graphics.device()
+draw.plot1(data)
+draw.plot2(data)
 draw.plot3(data)
+draw.plot4(data)
 save.png()
