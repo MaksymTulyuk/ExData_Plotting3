@@ -35,7 +35,7 @@ draw.plot3 <- function(data) {
                     ylab = "", ylim = range(Sub_metering_1)))
     par(new = TRUE)
     with(data, plot(datetime, Sub_metering_3, type = "l", col = "blue", xlab = "",
-                    ylab = "Energy sub metering", ylim = range(Sub_metering_1, )))
+                    ylab = "Energy sub metering", ylim = range(Sub_metering_1)))
     par(new = TRUE)
     legend("topright", lty = 1, bty = "n",
            col = c("black", "red", "blue"), legend = names(data)[5:7])
