@@ -12,5 +12,9 @@ load.data <- function () {
 }
 
 data <- load.data()
+# build plot
 hist(data$Global_active_power, col = "red", main = "Global Active Power",
      xlab = "Global Active Power (kilowatts)")
+# save png file
+dev.copy(png, filename = "plot1.png")
+dev.off()
