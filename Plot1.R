@@ -24,8 +24,7 @@ draw.plot1 <- function(data) {
 }
 
 close.graphics.device <- function() {
-    # save png file and close graphics device
-    #dev.copy(png, filename = "plot1.png")
+    # close graphics device
     dev.off()
 }
 

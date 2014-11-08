@@ -32,7 +32,6 @@ draw.plot3 <- function(data) {
 
 close.graphics.device <- function() {
     # close graphics device
-    #dev.copy(png, filename = "plot3.png")
     dev.off()
 }
 
