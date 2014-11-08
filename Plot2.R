@@ -11,8 +11,9 @@ load.data <- function () {
     data
 }
 
-reset.graphics.device <- function(x = 1, y = 1) {
+open.graphics.device <- function(x = 1, y = 1) {
     # reset graphics device
+    png(file = "plot2.png", width=480, height=480)
     par(mfrow = c(x, y))
 }
 
@@ -22,13 +23,13 @@ draw.plot2 <- function(data) {
                     ylab = "Global Active Power (kilowatts)"))
 }
 
-save.png <- function() {
+close.graphics.device <- function() {
     # save png file and close graphics device
-    dev.copy(png, filename = "plot2.png")
+    #dev.copy(png, filename = "plot2.png")
     dev.off()
 }
 
 data <- load.data()
-reset.graphics.device()
+open.graphics.device()
 draw.plot2(data)
-save.png()
+close.graphics.device()

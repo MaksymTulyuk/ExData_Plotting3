@@ -11,8 +11,9 @@ load.data <- function () {
     data
 }
 
-reset.graphics.device <- function(x = 1, y = 1) {
+open.graphics.device <- function(x = 1, y = 1) {
     # reset graphics device
+    png(file = "plot3.png", width=480, height=480)
     par(mfrow = c(x, y))
 }
 
@@ -29,13 +30,13 @@ draw.plot3 <- function(data) {
     legend("topright", lty = 1, col = c("black", "red", "blue"), legend = names(data)[5:7])
 }
 
-save.png <- function() {
-    # save png file and close graphics device
-    dev.copy(png, filename = "plot3.png")
+close.graphics.device <- function() {
+    # close graphics device
+    #dev.copy(png, filename = "plot3.png")
     dev.off()
 }
 
 data <- load.data()
-reset.graphics.device()
+open.graphics.device()
 draw.plot3(data)
-save.png()
+close.graphics.device()
