@@ -1,6 +1,13 @@
-load.data <- function () {
-    # download file
-    consumption <- read.csv("household_power_consumption.txt", sep = ";", na.strings = '?',
+load.file <- function (txtfile = "household_power_consumption.txt") {
+    # download and unzip file
+    url <- "http://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip"
+    zipfile <- "exdata-data-Fhousehold_power_consumption.zip"
+    download.file(url, zipfile, mode="wb")
+    unzip(zipfile, txtfile)
+}    
+
+get.data <- function (txtfile = "household_power_consumption.txt") {
+    consumption <- read.csv(txtfile, sep = ";", na.strings = '?',
                             colClasses = c(rep("character", 2), rep("numeric", 7)))
     # select rows w/ the dates 2007-02-01 and 2007-02-02
     data <- consumption[consumption[,"Date"] == "1/2/2007" | consumption[,"Date"] == "2/2/2007",]
@@ -28,7 +35,8 @@ close.graphics.device <- function() {
     dev.off()
 }
 
-data <- load.data()
+load.file()
+data <- get.data()
 open.graphics.device()
 draw.plot2(data)
 close.graphics.device()
