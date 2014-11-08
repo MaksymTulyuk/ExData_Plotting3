@@ -13,7 +13,8 @@ load.data <- function () {
 
 data <- load.data()
 # build plot
-
+with(data, plot(datetime, Global_active_power, type = "l", xlab = "",
+                ylab = "Global Active Power (kilowatts)"))
 # save png file
 dev.copy(png, filename = "plot2.png")
 dev.off()
