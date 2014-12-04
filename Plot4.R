@@ -1,68 +1,56 @@
-load.file <- function (txtfile = "household_power_consumption.txt") {
-    # download and unzip file
-    url <- "http://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip"
-    zipfile <- "exdata-data-Fhousehold_power_consumption.zip"
-    download.file(url, zipfile, mode="wb")
-    unzip(zipfile, txtfile)
-}    
+## Plot 4
+## emissions from coal combustion-related sources in the US, 1999-2008
 
-get.data <- function (txtfile = "household_power_consumption.txt") {
-    consumption <- read.csv(txtfile, sep = ";", na.strings = '?',
-                            colClasses = c(rep("character", 2), rep("numeric", 7)))
-    # select rows w/ the dates 2007-02-01 and 2007-02-02
-    data <- consumption[consumption[,"Date"] == "1/2/2007" | consumption[,"Date"] == "2/2/2007",]
-    rm(consumption)
-    # convert the columns Date and Time in to Posix format and remove the ununsed columns
-    data <- within(data, datetime <- as.POSIXct(paste(Date, Time), format = "%d/%m/%Y %H:%M:%S"))
-    data <- subset(data, select = -c(Date, Time))
-    data
+# How to reproduce research
+# 1. Download this script
+# 2. Download https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip
+# 3. Unzip xdata%2Fdata%2FNEI_data.zip
+# 4. Run the code in the command line: R --no-environ CMD BATCH plot4.R
+
+getDataWithCoal <- function(merged) {
+    # get column names from SCC.Level.Three has a word "Coal" and not "Mining"
+    coalSCCLevelNames <- grep("Coal", names(summary(merged$SCC.Level.Three)), value = TRUE)
+    coalSCCLevelNames <- grep("Mining", coalSCCLevelNames, value = TRUE, invert = TRUE)
+    # get column names from EI.Sector has a word "Coal"
+    coalEISectorNames <- grep("Coal", names(summary(merged$EI.Sector)), value = TRUE)
+    coalCombust <- subset(merged, EI.Sector %in% coalEISectorNames | SCC.Level.Three %in% coalSCCLevelNames,
+                           select = c(Emissions, year, EI.Sector, SCC.Level.One:SCC.Level.Four))
+    coalCombust
 }
 
-open.graphics.device <- function(x = 2, y = 2) {
+openGraphicsDevice <- function(file, x = 640, y = 480) {
     # reset graphics device
-    png(file = "plot4.png", width=480, height=480)
-    par(mfrow = c(x, y))
+    png(file, width = x, height = y)
+    par(mfrow=c(1,2), oma = c(0, 0, 2, 0))
 }
 
-draw.plot1 <- function(data) {
-    # build plot: Global active power
-    with(data, plot(datetime, Global_active_power, type = "l", xlab = ""))
+drawTwoPlots <- function(coalCombust, sumCoalCombust) {
+    # draw case-by-case and total emission plots
+    with(coalCombust, plot(year, Emissions, pch = 20, main = "Emission (case-by-case)"))
+    with(sumCoalCombust, plot(year, Emissions, pch = 20, main = "Total Emission",
+                              type = "l", col = 'red', lwd = 2))
 }
 
-draw.plot2 <- function(data) {
-    # build plot: Voltage
-    with(data, plot(datetime, Voltage, type = "l", ylim=range(Voltage)))
+closeGraphicsDevice <- function(label) {
+    title(main = label, outer = TRUE)
+    dev.off();
 }
 
-draw.plot3 <- function(data) {
-    # build plot: Sub metering
-    with(data, plot(datetime, Sub_metering_1, type = "l", xlab = "", ylab = ""))
-    par(new = TRUE)
-    with(data, plot(datetime, Sub_metering_2, type = "l", col = "red", xlab = "",
-                    ylab = "", ylim = range(Sub_metering_1)))
-    par(new = TRUE)
-    with(data, plot(datetime, Sub_metering_3, type = "l", col = "blue", xlab = "",
-                    ylab = "Energy sub metering", ylim = range(Sub_metering_1)))
-    par(new = TRUE)
-    legend("topright", lty = 1, bty = "n",
-           col = c("black", "red", "blue"), legend = names(data)[5:7])
-}
+# load and merge data sheets
+NEI <- readRDS("exdata-data-NEI_data/summarySCC_PM25.rds")
+SCC <- readRDS("exdata-data-NEI_data/Source_Classification_Code.rds")
+merged <- merge(NEI, SCC)
+# let's save memory by deleting big data
+rm(NEI)
+rm(SCC)
 
-draw.plot4 <- function(data) {
-    # build plot: Global reactive power
-    with(data, plot(datetime, Global_reactive_power, type = "l"))
-}
+# get coal related data and summary coal data
+coalCombust <- getDataWithCoal(merged)
+sumCoalCombust <- aggregate(Emissions ~ year, data = coalCombust, sum)
 
-close.graphics.device <- function() {
-    # close graphics device
-    dev.off()
-}
-
-load.file()
-data <- get.data()
-open.graphics.device()
-draw.plot1(data)
-draw.plot2(data)
-draw.plot3(data)
-draw.plot4(data)
-close.graphics.device()
+# open PNG file to save plots
+openGraphicsDevice("plot4.png")
+# draw plots
+drawTwoPlots(coalCombust, sumCoalCombust)
+# close the PNG file
+closeGraphicsDevice("Coal combustion-related emission in the US, 1999-2008")

@@ -1,42 +1,48 @@
-load.file <- function (txtfile = "household_power_consumption.txt") {
-    # download and unzip file
-    url <- "http://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip"
-    zipfile <- "exdata-data-Fhousehold_power_consumption.zip"
-    download.file(url, zipfile, mode="wb")
-    unzip(zipfile, txtfile)
-}    
+## Plot 1
+## Total emissions in the United States from 1999 to 2008
 
-get.data <- function (txtfile = "household_power_consumption.txt") {
-    consumption <- read.csv(txtfile, sep = ";", na.strings = '?',
-                            colClasses = c(rep("character", 2), rep("numeric", 7)))
-    # select rows w/ the dates 2007-02-01 and 2007-02-02
-    data <- consumption[consumption[,"Date"] == "1/2/2007" | consumption[,"Date"] == "2/2/2007",]
-    rm(consumption)
-    # convert the columns Date and Time in to Posix format and remove the ununsed columns
-    data <- within(data, datetime <- as.POSIXct(paste(Date, Time), format = "%d/%m/%Y %H:%M:%S"))
-    data <- subset(data, select = -c(Date, Time))
-    data
+# How to reproduce research
+# 1. Download this script
+# 2. Download https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip
+# 3. Unzip xdata%2Fdata%2FNEI_data.zip
+# 4. Run the code in the command line: R --no-environ CMD BATCH plot1.R
+
+getEmissionYear <- function(data) {    
+    # total emission per each year
+    aggregate(Emissions ~ year, data = data, sum)
 }
 
-open.graphics.device <- function(x = 1, y = 1) {
+openGraphicsDevice <- function(file) {
     # reset graphics device
-    png(file = "plot1.png", width=480, height=480)
-    par(mfrow = c(x, y))
+    png(file)
 }
 
-draw.plot1 <- function(data) {
-    # build plot
-    hist(data$Global_active_power, col = "red", main = "Global Active Power",
-         xlab = "Global Active Power (kilowatts)")
+drawPlotAndRegressionLine <- function(data) {
+    # plot total emission per year
+    with(data, plot(year, Emissions, pch = 19))
+    
+    # regression line
+    model <- lm(Emissions ~ year, data)
+    abline(model, lwd = 2)
+
+    # legend
+    par(new = TRUE)
+    legend("topright", lty = 1, lwd = 2, legend = "Regression line")
 }
 
-close.graphics.device <- function() {
-    # close graphics device
-    dev.off()
+closeGraphicsDevice <- function(label) {
+    title(main = label)
+    dev.off();
 }
 
-load.file()
-data <- get.data()
-open.graphics.device()
-draw.plot1(data)
-close.graphics.device()
+# load data sheet
+NEI <- readRDS("exdata-data-NEI_data/summarySCC_PM25.rds")
+
+# count emission per year in the US
+EmissionPerYear <- getEmissionYear(NEI)
+
+# open file to save plot
+openGraphicsDevice("plot1.png")
+drawPlotAndRegressionLine(EmissionPerYear)
+# set title and close PNG file
+closeGraphicsDevice("Total emissions in the US, 1999-2008")

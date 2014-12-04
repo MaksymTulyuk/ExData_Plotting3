@@ -1,49 +1,36 @@
-load.file <- function (txtfile = "household_power_consumption.txt") {
-    # download and unzip file
-    url <- "http://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip"
-    zipfile <- "exdata-data-Fhousehold_power_consumption.zip"
-    download.file(url, zipfile, mode="wb")
-    unzip(zipfile, txtfile)
-}    
+## Plot 3
+## Emissions per type (point, nonpoint, onroad, nonroad) in the Baltimore City, Maryland ("24510") from 1999 to 2008
 
-get.data <- function (txtfile = "household_power_consumption.txt") {
-    consumption <- read.csv(txtfile, sep = ";", na.strings = '?',
-                            colClasses = c(rep("character", 2), rep("numeric", 7)))
-    # select rows w/ the dates 2007-02-01 and 2007-02-02
-    data <- consumption[consumption[,"Date"] == "1/2/2007" | consumption[,"Date"] == "2/2/2007",]
-    rm(consumption)
-    # convert the columns Date and Time in to Posix format and remove the ununsed columns
-    data <- within(data, datetime <- as.POSIXct(paste(Date, Time), format = "%d/%m/%Y %H:%M:%S"))
-    data <- subset(data, select = -c(Date, Time))
+# How to reproduce research
+# 1. Download this script
+# 2. Download https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip
+# 3. Unzip xdata%2Fdata%2FNEI_data.zip
+# 4. Run the code in the command line: R --no-environ CMD BATCH plot3.R
+
+library("ggplot2")
+
+getBaltimore <- function(data) {
+    # select data for Baltimore
+    data[data$fips == "24510",]
+}
+
+factoriseColumns <- function(data) {
+    # change type from str to factor for ggplot2
+    data[c(1,2,3,5)] <- lapply(data[c(1,2,3,5)], as.factor)
     data
 }
 
-open.graphics.device <- function(x = 1, y = 1) {
-    # reset graphics device
-    png(file = "plot3.png", width=480, height=480)
-    par(mfrow = c(x, y))
-}
+# load data sheet
+NEI <- readRDS("exdata-data-NEI_data/summarySCC_PM25.rds")
 
-draw.plot3 <- function(data) {
-    # build plot
-    with(data, plot(datetime, Sub_metering_1, type = "l", xlab = "", ylab = ""))
-    par(new = TRUE)
-    with(data, plot(datetime, Sub_metering_2, type = "l", col = "red", xlab = "",
-                    ylab = "", ylim = range(Sub_metering_1)))
-    par(new = TRUE)
-    with(data, plot(datetime, Sub_metering_3, type = "l", col = "blue", xlab = "",
-                    ylab = "Energy sub metering", ylim = range(Sub_metering_1)))
-    par(new = TRUE)
-    legend("topright", lty = 1, col = c("black", "red", "blue"), legend = names(data)[5:7])
-}
+# clean up data and draw plot with it
+Baltimore <- getBaltimore(NEI)
+Baltimore <- factoriseColumns(Baltimore)
 
-close.graphics.device <- function() {
-    # close graphics device
-    dev.off()
-}
-
-load.file()
-data <- get.data()
-open.graphics.device()
-draw.plot3(data)
-close.graphics.device()
+# draw 4 plots
+plot <- qplot(year, Emissions, data = Baltimore, main ="Emissions per type in the Baltimore City, 1999-2008") +
+    # with different colours and scales (one per each type of emisson)
+    aes(colour = factor(type)) + facet_wrap(~type, scales="free_y") +
+    # and with summary line on each plot
+    stat_summary(fun.y = sum, geom="line")
+ggsave("plot3.png", plot, width=8, height=8, dpi=120)
